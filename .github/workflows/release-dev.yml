@@ -27,10 +27,12 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: Commit dist folder and push to development branch
               run: |
-                git config user.name "Automation"
-                git config user.email Automation@build.com
-                git add --force ./dist/*
-                git commit -m "ncc build files"
-                git push --force https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:${GITHUB_REF}
+                if [[ `git status --porcelain` ]]; then
+                  git config user.name "Automation"
+                  git config user.email Automation@build.com
+                  git add --force ./dist/*
+                  git commit -m "ncc build files"
+                  git push --force https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:${GITHUB_REF}
+                fi
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
