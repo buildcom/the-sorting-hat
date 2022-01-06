@@ -252,7 +252,7 @@ const run = async () => {
 		if (context.eventName === 'pull_request') {
 			await handlePullRequest();
 		} else {
-			info('No relevant event found');
+			info('No relevant event found...');
 		}
 	} catch (e) {
 		error(e);
