@@ -1,9 +1,8 @@
-name: Test workflow
+name: Run action (open PRs)
 on:
     pull_request:
 jobs:
   run-action:
-    if: ${{ contains(github.ref, 'SODEV') }}
     runs-on: ubuntu-latest
     steps:
       - uses: styfle/cancel-workflow-action@0.8.0
