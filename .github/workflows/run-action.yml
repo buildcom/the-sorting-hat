@@ -15,6 +15,7 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
       - name: Run GH action from dev branch
         id: sorting-hat
+        # Modify the branch name for testing (after the @ symbol)
         uses: buildcom/the-sorting-hat@test-pr
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

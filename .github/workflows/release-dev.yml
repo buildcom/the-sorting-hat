@@ -1,4 +1,4 @@
-name: Release to vdev
+name: Release to development branch
 on:
     push:
       branches:
