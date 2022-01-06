@@ -1,11 +1,11 @@
-name: Release to vdev
+name: Release to development branch
 on:
     push:
       branches:
-        - dev
+        - 'SODEV*'
 jobs:
     release:
-        name: release-vdev
+        name: release-development-branch
         runs-on: ubuntu-latest
         steps:
             - uses: styfle/cancel-workflow-action@0.8.0
@@ -25,18 +25,12 @@ jobs:
                 npm run build
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            - name: Release dry-run
-              # This will just show what would happen during the real release process
-              # on the next merge to main
-              run: npx semantic-release --dry-run
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            - name: Commit dist folder and push to vdev branch
+            - name: Commit dist folder and push to development branch
               run: |
                 git config user.name "Automation"
                 git config user.email Automation@build.com
                 git add --force ./dist/*
                 git commit -m "ncc build files"
-                git push --force https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:refs/heads/vdev
+                git push --force https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:${GITHUB_REF}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
