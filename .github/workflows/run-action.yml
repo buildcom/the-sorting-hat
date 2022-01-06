@@ -2,7 +2,8 @@ name: Test workflow
 on:
     pull_request:
       branches:
-        - test-pr
+      # Modify the branch name with your testing branch name
+        - branch-name-here
 jobs:
   run-action:
     runs-on: ubuntu-latest
@@ -16,7 +17,7 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
       - name: Run GH action from dev branch
         id: sorting-hat
-        # Modify the branch name for testing (after the @ symbol)
+        # Modify the branch name with the SODEV branch name
         uses: buildcom/the-sorting-hat@branchname_here
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
