@@ -1,6 +1,8 @@
 name: Run action (open PRs)
 on:
-    pull_request:
+    push:
+      branches:
+      -  'test-pr'
 jobs:
   run-action:
     runs-on: ubuntu-latest
