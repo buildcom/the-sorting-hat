@@ -16,7 +16,7 @@ jobs:
       - name: Run GH action from dev branch
         id: sorting-hat
         # Modify the branch name for testing (after the @ symbol)
-        uses: buildcom/the-sorting-hat@test-pr
+        uses: buildcom/the-sorting-hat@SODEV-34916
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Get output
