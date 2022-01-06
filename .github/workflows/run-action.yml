@@ -1,7 +1,8 @@
 name: Test workflow
 on:
-  pull_request:
-
+    pull_request:
+      branches:
+        - test-pr
 jobs:
   run-action:
     runs-on: ubuntu-latest
