@@ -3,7 +3,7 @@ const { join } = require('path');
 const { exec } = require('child_process');
 /* eslint-disable no-console */
 
-// Usage: node ./test/generateFiles.js <number of lines to add> <create as mock?> <server file?> <commit and push?>
+// Usage: node ./test/generateFiles.js <number of lines to add> <create as mock (exluded file)?> <server file?> <commit and push?>
 // Example: node ./test/generateFiles.js 31 yes yes no
 // a file called 31lines.mock.txt will be generated in the server directory but will not be committed and pushed
 
