@@ -23,4 +23,7 @@ jobs:
       - name: Get output
         env:
             CURRENT_LABELS: ${{ steps.sorting-hat.outputs.labels }}
-        run: echo "$CURRENT_LABELS"
+            SKIP_DEPLOY: ${{ steps.sorting-hat.outputs.skip-deploy }}
+        run: |
+          echo "$CURRENT_LABELS"
+          echo "$SKIP_DEPLOY"
