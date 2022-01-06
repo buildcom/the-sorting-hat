@@ -1,8 +1,6 @@
 name: Run action (open PRs)
 on:
-    push:
-      branches:
-        - 'SODEV*'
+    pull_request:
 jobs:
   run-action:
     runs-on: ubuntu-latest
