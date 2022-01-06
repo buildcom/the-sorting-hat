@@ -50,6 +50,9 @@ force push.
 modify the `run-action.yml` file in that branch to point to the SODEV branch (see
 comments in file). There is a script `test/generateFiles.js` that can be used to create different
 types of changed files quickly. See the script comments for usage directions.
+1. At least one commit should use the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.2/)
+format so a release will be triggered when merging later. (The [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/#commit-message-format)
+utility requires that for versioning.)
 
 ## Testing
 
