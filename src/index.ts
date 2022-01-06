@@ -216,7 +216,7 @@ const handlePullRequest = async () => {
 					name: label.name
 				});
 			} catch (e) {
-				warning(e)
+				warning(e);
 			}
 		}
 	} else {
@@ -252,7 +252,7 @@ const run = async () => {
 		if (context.eventName === 'pull_request') {
 			await handlePullRequest();
 		} else {
-			return warning('No relevant event found');
+			info('No relevant event found');
 		}
 	} catch (e) {
 		error(e);
