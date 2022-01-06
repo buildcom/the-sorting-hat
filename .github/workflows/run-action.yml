@@ -1,9 +1,6 @@
 name: Test workflow
 on:
     pull_request:
-      branches:
-      # Modify the branch name with your testing branch name
-        - branch-name-here
 jobs:
   run-action:
     runs-on: ubuntu-latest

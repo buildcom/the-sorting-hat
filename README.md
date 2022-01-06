@@ -47,7 +47,7 @@ TypeScript validation, linting and prettier. Local development may be possible u
 automatically with the compiled `dist` files. You'll need to pull before pushing again unless you
 force push.
 1. Once that workflow is complete, you can use another branch to test changes. You will need to
-modify the `run-action.yml` file in that branch to point to the testing branch and SODEV branch (see
+modify the `run-action.yml` file in that branch to point to the SODEV branch (see
 comments in file). There is a script `test/generateFiles.js` that can be used to create different
 types of changed files quickly. See the script comments for usage directions.
 
