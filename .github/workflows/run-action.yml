@@ -1,4 +1,4 @@
-name: Run action (open PRs)
+name: Run action on pull_request
 on:
     pull_request:
 jobs:
@@ -16,7 +16,7 @@ jobs:
       - name: Run GH action from dev branch
         id: sorting-hat
         # Replace v1 with the SODEV branch name when testing
-        uses: buildcom/the-sorting-hat@SODEV-34573
+        uses: buildcom/the-sorting-hat@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Get output
