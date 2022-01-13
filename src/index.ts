@@ -295,7 +295,8 @@ const handlePushEvent = async () => {
 		return false;
 	});
 	info(`Skip deployment of all files: ${skipDeployment}`);
-	core.setOutput('skip-deploy', skipDeployment);
+	// core.setOutput('skip-deploy', skipDeployment);
+	core.setOutput('skip-deploy', 'false');
 };
 
 const run = async () => {
