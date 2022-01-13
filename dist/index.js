@@ -7784,18 +7784,17 @@ const handlePullRequest = () => __awaiter(void 0, void 0, void 0, function* () {
     _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('labels', actionOutputLabels);
 });
 const handlePushEvent = () => __awaiter(void 0, void 0, void 0, function* () {
-    const commitBeingPushed = context.payload.after;
-    const defaultBranch = context.payload.repository.default_branch;
-    const getDefaultBranchCommits = yield client.rest.repos.listCommits(Object.assign({}, context.repo));
-    const defaultBranchHeadCommit = getDefaultBranchCommits.data[0].sha;
-    info(`Comparing commit ${defaultBranchHeadCommit} on ${defaultBranch} with ${commitBeingPushed} on ${context.ref}`);
+    // This is only meant to be used on the default branch when PR merges use squashed commits
+    const latestCommit = context.payload.after;
+    const previousCommit = context.payload.before;
+    info(`Comparing latest commit ${latestCommit} with previous commit ${previousCommit} on ${context.ref}`);
     const compareCommits = yield client.rest.repos.compareCommitsWithBasehead({
-        basehead: `${defaultBranchHeadCommit}...${commitBeingPushed}`,
+        basehead: `${previousCommit}...${latestCommit}`,
         owner: context.repo.owner,
         repo: context.repo.repo
     });
     const files = compareCommits.data.files;
-    info(`Files different from ${defaultBranch}: ${files.map((file) => file.filename).join(', ')}`);
+    info(`Files different between commits: ${files.map((file) => file.filename).join(', ')}`);
     info(`Non-deployment glob patterns: ${NON_DEPLOYMENT_GLOB_PATTERNS.join(', ')}`);
     const skipDeployment = files.every((file) => {
         if (NON_DEPLOYMENT_GLOB_PATTERNS.some((glob) => minimatch__WEBPACK_IMPORTED_MODULE_2__(file.filename, glob))) {
