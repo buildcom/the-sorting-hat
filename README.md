@@ -16,7 +16,9 @@ New list of PR labels after action run
 
 ### `skip-deploy`
 
-Skip deployment based on files being pushed? Returns "true" or "false" -- must compare as a string value in the "if" expression.
+Skip deployment based on files being pushed? Returns "true" or "false" -- must compare as a string
+value in the "if" expression. This should only be relied on for the default branch in a repo where
+commits are squashed in PRs!!
 
 ## Example job usage
 
