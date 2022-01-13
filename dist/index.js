@@ -7578,7 +7578,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 const DEBUG = false; // set this to true for extra logging
 let context;
 const client = _actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit(_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('token'));
-const customLabels = [
+const CUSTOM_LABELS = [
     {
         name: 'size/XS',
         type: 'size',
@@ -7620,6 +7620,30 @@ const customLabels = [
         color: '66E5A2'
     }
 ];
+const MOCK_GLOB_PATTERN = '**/*.+(mocks|mock-data).ts';
+const STORY_GLOB_PATTERN = '**/*.story.ts?(x)';
+const GITHUB_GLOB_PATTERN = '.github/**';
+const HUSKY_GLOB_PATTERN = '.husky/**';
+const OUTFILE_GLOB_PATTERN = '.out/**';
+const STORYBOOK_GLOB_PATTERN = '.storybook/**';
+const VSCODE_GLOB_PATTERN = '.vscode/**';
+const FERGY_TEMPLATES_GLOB_PATTERN = 'fergy-templates/**';
+const DOCS_GLOB_PATTERN = '**/*.md';
+const DOCS_MISC_GLOB_PATTERN = 'doc*/**';
+const TESTS_GLOB_PATTERN = '**/*.test.ts?(x)';
+const NON_DEPLOYMENT_GLOB_PATTERNS = [
+    MOCK_GLOB_PATTERN,
+    STORY_GLOB_PATTERN,
+    GITHUB_GLOB_PATTERN,
+    HUSKY_GLOB_PATTERN,
+    OUTFILE_GLOB_PATTERN,
+    STORYBOOK_GLOB_PATTERN,
+    VSCODE_GLOB_PATTERN,
+    FERGY_TEMPLATES_GLOB_PATTERN,
+    DOCS_GLOB_PATTERN,
+    DOCS_MISC_GLOB_PATTERN,
+    TESTS_GLOB_PATTERN
+];
 const info = (stuff) => _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(stuff);
 const warning = (stuff) => _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning(stuff);
 const error = (stuff) => {
@@ -7631,9 +7655,7 @@ const error = (stuff) => {
     }
 };
 const debug = (stuff) => DEBUG && _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`DEBUG: ${stuff}`);
-const sortedSizeLabels = customLabels
-    .filter((label) => label.type === 'size')
-    .sort((a, b) => (!a.maxLines ? 1 : !b.maxLines ? -1 : a.maxLines - b.maxLines));
+const sortedSizeLabels = CUSTOM_LABELS.filter((label) => label.type === 'size').sort((a, b) => !a.maxLines ? 1 : !b.maxLines ? -1 : a.maxLines - b.maxLines);
 const getLabelNames = (labels) => labels.map((label) => label.name);
 const getSizeLabel = (lineCount) => {
     for (const label of sortedSizeLabels) {
@@ -7701,7 +7723,7 @@ const getSizeBasedLabels = (changedLines, files, existingPRLabels) => __awaiter(
 });
 const getServerOnlyLabel = (files, existingPRLabels) => {
     const serverOnlyPattern = '**/src/server/**';
-    const serverOnlyLabel = customLabels.find((label) => label.type === 'server-only');
+    const serverOnlyLabel = CUSTOM_LABELS.find((label) => label.type === 'server-only');
     if (!serverOnlyLabel) {
         return { labelToAdd: [], labelsToRemove: [] };
     }
@@ -7761,14 +7783,41 @@ const handlePullRequest = () => __awaiter(void 0, void 0, void 0, function* () {
     info(`Action output -- labels: ${actionOutputLabels}`);
     _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('labels', actionOutputLabels);
 });
+const handlePushEvent = () => __awaiter(void 0, void 0, void 0, function* () {
+    const commitBeingPushed = context.payload.after;
+    const defaultBranch = context.payload.repository.default_branch;
+    const getDefaultBranchCommits = yield client.rest.repos.listCommits(Object.assign({}, context.repo));
+    const defaultBranchHeadCommit = getDefaultBranchCommits.data[0].sha;
+    info(`Comparing commit ${defaultBranchHeadCommit} on ${defaultBranch} with ${commitBeingPushed} on ${context.ref}`);
+    const compareCommits = yield client.rest.repos.compareCommitsWithBasehead({
+        basehead: `${defaultBranchHeadCommit}...${commitBeingPushed}`,
+        owner: context.repo.owner,
+        repo: context.repo.repo
+    });
+    const files = compareCommits.data.files;
+    info(`Files different from ${defaultBranch}: ${files.map((file) => file.filename).join(', ')}`);
+    info(`Non-deployment glob patterns: ${NON_DEPLOYMENT_GLOB_PATTERNS.join(', ')}`);
+    const skipDeployment = files.every((file) => {
+        if (NON_DEPLOYMENT_GLOB_PATTERNS.some((glob) => minimatch__WEBPACK_IMPORTED_MODULE_2__(file.filename, glob))) {
+            return true;
+        }
+        info(`Deployable file ${file.filename} found`);
+        return false;
+    });
+    info(`Skip deployment of all files: ${skipDeployment}`);
+    _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('skip-deploy', skipDeployment);
+});
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         context = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context;
         if (context.eventName === 'pull_request') {
             yield handlePullRequest();
         }
+        else if (context.eventName === 'push') {
+            yield handlePushEvent();
+        }
         else {
-            info('No relevant event found');
+            info(`No relevant event found. Event: ${context.eventName}`);
         }
     }
     catch (e) {

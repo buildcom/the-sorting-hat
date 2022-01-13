@@ -11,6 +11,10 @@ jobs:
             - uses: styfle/cancel-workflow-action@0.8.0
               with:
                   access_token: ${{ secrets.GITHUB_TOKEN }}
+            - name: Dump github context
+              env:
+                  GITHUB_CONTEXT: ${{ toJSON(github) }}
+              run: echo "$GITHUB_CONTEXT"
             - name: Checkout repo
               uses: actions/checkout@v2
               with:

@@ -1,0 +1,27 @@
+name: Run on pull_request
+# This will run on all pull_request events on branches without 'sodev' in the name. Make sure to
+# replace `v1` with the branch name containing the new action code you want to test
+on:
+    pull_request:
+jobs:
+  run-action:
+    if: ${{ !contains(github.head_ref, 'sodev') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Dump github context
+        env:
+            GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Run GH action from dev branch
+        id: sorting-hat
+        # Replace v1 with the SODEV branch name when testing
+        uses: buildcom/the-sorting-hat@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get output
+        env:
+            CURRENT_LABELS: ${{ steps.sorting-hat.outputs.labels }}
+        run: echo "$CURRENT_LABELS"

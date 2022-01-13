@@ -1,0 +1,45 @@
+name: 'test-deploy-false: This should not deploy'
+# Used for this PR: https://github.com/buildcom/the-sorting-hat/pull/7
+# A file from each glob pattern group was added to branch to make sure the output of skip-deploy
+# was 'true'. Make sure to replace `v1` with the branch name containing the new action code you want
+# to test
+on:
+    push:
+      branches:
+      -  'test-deploy-false'
+jobs:
+  run-action:
+    runs-on: ubuntu-latest
+    outputs:
+      skip-deploy: ${{ steps.sorting-hat.outputs.skip-deploy }}
+    steps:
+      - uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Dump github context
+        env:
+            GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Run GH action from dev branch
+        id: sorting-hat
+        # Replace v1 with the SODEV branch name when testing
+        uses: buildcom/the-sorting-hat@SODEV-34573
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get output
+        env:
+            CURRENT_LABELS: ${{ steps.sorting-hat.outputs.labels }}
+            SKIP_DEPLOY: ${{ steps.sorting-hat.outputs.skip-deploy }}
+        run: |
+          echo "Output: labels: $CURRENT_LABELS"
+          echo "Output: skip-deploy: $SKIP_DEPLOY"
+  skip-deploy:
+    needs: run-action
+    #
+    if: needs.run-action.outputs.skip-deploy == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      -  run: |
+          echo skip-deploy: ${{ needs.run-action.outputs.skip-deploy}}
+          echo will this deploy? ${{ needs.run-action.outputs.skip-deploy == 'false' }}
+          echo Deploy!

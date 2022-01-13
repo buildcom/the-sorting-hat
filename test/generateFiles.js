@@ -18,7 +18,7 @@ let stuff = '';
 for (let i = 0; i < Number(lineCount); i++) {
 	stuff += `${i + 1}${i < Number(lineCount) - 1 ? `\n` : ''}`;
 }
-const fileName = excludedFile === 'yes' ? `${lineCount}lines.mock.ts` : `${lineCount}lines.txt`;
+const fileName = excludedFile === 'yes' ? `${lineCount}lines.mocks.ts` : `${lineCount}lines.txt`;
 const filePath = join(generatedFileDirectory, fileName);
 console.log(filePath);
 

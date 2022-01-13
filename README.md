@@ -4,28 +4,46 @@ GitHub action to label stuff.
 
 ## Inputs
 
-## `token`
+### `token`
 
 **Required** The GITHUB_TOKEN secret
 
 ## Outputs
 
-## `labels`
+### `labels`
 
 New list of PR labels after action run
 
+### `skip-deploy`
+
+Skip deployment based on files being pushed? Returns "true" or "false" -- must compare as a string value in the "if" expression.
+
 ## Example job usage
 
+```
 label-pr:
 	name: Label PR
 	runs-on: ubuntu-latest
 	outputs:
 		labels: ${{ steps.sorting-hat.outputs.labels }}
+		skip-deploy: ${{ steps.sorting-hat.outputs.skip-deploy }}
 	steps:
 		- id: sorting-hat
 			uses: buildcom/the-sorting-hat@v1
 			with:
 				token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+```
+skip-deploy:
+    needs: label-pr
+	# This will not run if only non-production files are found
+    if: needs.label-pr.outputs.skip-deploy == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      -  run: <... deployment steps ...>
+```
+
 
 ## Features
 
@@ -33,6 +51,8 @@ label-pr:
     -   Original PR size labeling functionality taken from [Pull Request Size](https://github.com/noqcks/pull-request-size)
     -   Excludes files listed as `linguist-generated=true` or `pr-size-ignore=true` in `.gitattributes`
 -   Labels PRs as `server-only` if no changed files outside the `server` directory are found.
+-   Checks files being pushed to see if they are all non-production and outputs a true/false `skip-deploy`
+    value. This can be used to skip deployment on a push to the `main` branch.
 
 ## Development
 
@@ -46,13 +66,27 @@ TypeScript validation, linting and prettier. Local development may be possible u
 1. The `release-dev.yml` workflow will run and build the action. NOTE: this will add a commit
 automatically with the compiled `dist` files. You'll need to pull before pushing again unless you
 force push.
-1. Once that workflow is complete, you can use another branch to test changes. You will need to
-modify the `run-action.yml` file in that branch to point to the SODEV branch (see
-comments in file). There is a script `test/generateFiles.js` that can be used to create different
-types of changed files quickly. See the script comments for usage directions.
+1. Once that workflow is complete, you need to use another branch to test changes. You can use the
+sample workflows in `.github/sample-workflows` to create a workflow for that branch. Also, there is
+a script `test/generateFiles.js` that can be used to create different types of changed files
+quickly. See the script comments for usage directions.
 1. At least one commit should use the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.2/)
 format so a release will be triggered when merging later. (The [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/#commit-message-format)
 utility requires that for versioning.)
+
+## CI/CD
+
+-  `release.yml`: On a push to `main`, semantic-release will run to determine if a release and tag
+should be generated. Then the ncc build will run and be pushed to the `v1` branch. The `v1` branch
+is where calling workflows should point to for the action
+-  `release-dev.yml`: On a push to any SODEV* branch, the ncc build will run and be pushed to that
+same branch. You can then point test workflows to that branch for the action
+-  `release-dry-run.yml`: You can manually run this against a branch to see if a release & tag will
+be triggered to make sure you have your commits named properly
+-  `label-pr.yml`: This will use this action's labeling feature to label the PRs based on size
+-  `get-pr-payload.yml`: You can enable this workflow to get a JSON file containing the pull_request
+payload. This makes it easier to look at that data using an IDE's search and collapse features
+-  `get-push-payload.yml`: Same as above but for push events
 
 ## Testing
 
@@ -70,6 +104,7 @@ workflows actually run.
 
 ## Architecture Notes
 
+-   [GitHub Actions Toolkit Documentation](https://github.com/actions/toolkit)
 -   To avoid checking in the `node_modules` directory, [`@vercel/ncc`](https://github.com/vercel/ncc) is used to compile everything into a single Javascript file
 -   Originally built with [Probot](https://github.com/probot/probot) and converted to run as GitHub
 Action instead of an App. This means the application does not have to be deployed but can be run as

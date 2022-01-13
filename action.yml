@@ -11,6 +11,9 @@ inputs:
 outputs:
   labels:
     description: 'New list of PR labels after action run'
+  skip-deploy:
+    description: 'Skip deployment based on files being pushed? Returns "true"
+      or "false" -- must compare as a string value in the "if" expression.'
 runs:
     using: 'node12'
     main: 'dist/index.js'
