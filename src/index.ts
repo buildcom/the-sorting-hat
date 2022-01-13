@@ -85,6 +85,7 @@ const VSCODE_GLOB_PATTERN = '.vscode/**';
 const FERGY_TEMPLATES_GLOB_PATTERN = 'fergy-templates/**';
 const DOCS_GLOB_PATTERN = '**/*.md';
 const DOCS_MISC_GLOB_PATTERN = 'doc*/**';
+const TESTS_GLOB_PATTERN = '**/*.test.ts?(x)';
 const NON_DEPLOYMENT_GLOB_PATTERNS = [
 	MOCK_GLOB_PATTERN,
 	STORY_GLOB_PATTERN,
@@ -95,7 +96,8 @@ const NON_DEPLOYMENT_GLOB_PATTERNS = [
 	VSCODE_GLOB_PATTERN,
 	FERGY_TEMPLATES_GLOB_PATTERN,
 	DOCS_GLOB_PATTERN,
-	DOCS_MISC_GLOB_PATTERN
+	DOCS_MISC_GLOB_PATTERN,
+	TESTS_GLOB_PATTERN
 ];
 
 const info = (stuff: string) => core.info(stuff);
