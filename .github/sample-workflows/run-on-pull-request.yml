@@ -1,11 +1,9 @@
 name: Run on pull_request
-# This will run on all pull_request events on branches without 'sodev' in the name. Make sure to
-# replace `v1` with the branch name containing the new action code you want to test
+# This will run on all pull_request events. Make sure to replace `v1` with the branch name containing the new action code you want to test
 on:
     pull_request:
 jobs:
   run-action:
-    if: ${{ !contains(github.head_ref, 'sodev') }}
     runs-on: ubuntu-latest
     steps:
       - uses: styfle/cancel-workflow-action@0.8.0
