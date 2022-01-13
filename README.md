@@ -98,7 +98,7 @@ This repo needs tests! There's a test file but it's based on the old version tha
 ## Deployment
 
 1. When the PR is approved and merged, it will kick off the `release.yml` workflow which will bump
-the version, build the action and push it to the `v1` branch which production workflows point to.
+the version and push it to the `v1` branch which production workflows point to.
 1. The changes will take effect immediately since the production workflows point to the `v1` branch
 version. We could change this to use the actual tags/version numbers at some point for safety, but
 that would require changing the consuming workflows so this is simpler.
