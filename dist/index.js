@@ -7805,7 +7805,8 @@ const handlePushEvent = () => __awaiter(void 0, void 0, void 0, function* () {
         return false;
     });
     info(`Skip deployment of all files: ${skipDeployment}`);
-    _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('skip-deploy', skipDeployment);
+    // core.setOutput('skip-deploy', skipDeployment);
+    _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('skip-deploy', 'false');
 });
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
