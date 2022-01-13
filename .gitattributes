@@ -1,3 +1,6 @@
 # Mock data
 **/*.mocks.ts pr-size-ignore=true
 **/*.mock-data.ts pr-size-ignore=true
+
+# build files
+dist/* linguist-generated=true
