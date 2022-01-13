@@ -1,8 +1,12 @@
-name: 'test-deploy-true: This should deploy'
+name: 'test-deploy-false: This should not deploy'
+# Used for this PR: https://github.com/buildcom/the-sorting-hat/pull/7
+# A file from each glob pattern group was added to branch to make sure the output of skip-deploy
+# was 'true'. Make sure to replace `v1` with the branch name containing the new action code you want
+# to test
 on:
     push:
       branches:
-      -  'test-deploy-true'
+      -  'test-deploy-false'
 jobs:
   run-action:
     runs-on: ubuntu-latest
@@ -31,10 +35,11 @@ jobs:
           echo "Output: skip-deploy: $SKIP_DEPLOY"
   skip-deploy:
     needs: run-action
+    #
     if: needs.run-action.outputs.skip-deploy == 'false'
     runs-on: ubuntu-latest
     steps:
-      - run: |
+      -  run: |
           echo skip-deploy: ${{ needs.run-action.outputs.skip-deploy}}
           echo will this deploy? ${{ needs.run-action.outputs.skip-deploy == 'false' }}
           echo Deploy!

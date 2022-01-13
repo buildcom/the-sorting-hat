@@ -66,13 +66,27 @@ TypeScript validation, linting and prettier. Local development may be possible u
 1. The `release-dev.yml` workflow will run and build the action. NOTE: this will add a commit
 automatically with the compiled `dist` files. You'll need to pull before pushing again unless you
 force push.
-1. Once that workflow is complete, you can use another branch to test changes. You will need to
-modify the `run-action.yml` file (or create a new workflow file -- examples: `test-deploy-true.yml` and `test-deploy-false`) in that branch to point to the
-SODEV branch (see comments in file). There is a script `test/generateFiles.js` that can be used to create different
-types of changed files quickly. See the script comments for usage directions.
+1. Once that workflow is complete, you need to use another branch to test changes. You can use the
+sample workflows in `.github/sample-workflows` to create a workflow for that branch. Also, there is
+a script `test/generateFiles.js` that can be used to create different types of changed files
+quickly. See the script comments for usage directions.
 1. At least one commit should use the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.2/)
 format so a release will be triggered when merging later. (The [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/#commit-message-format)
 utility requires that for versioning.)
+
+## CI/CD
+
+-  `release.yml`: On a push to `main`, semantic-release will run to determine if a release and tag
+should be generated. Then the ncc build will run and be pushed to the `v1` branch. The `v1` branch
+is where calling workflows should point to for the action
+-  `release-dev.yml`: On a push to any SODEV* branch, the ncc build will run and be pushed to that
+same branch. You can then point test workflows to that branch for the action
+-  `release-dry-run.yml`: You can manually run this against a branch to see if a release & tag will
+be triggered to make sure you have your commits named properly
+-  `label-pr.yml`: This will use this action's labeling feature to label the PRs based on size
+-  `get-pr-payload.yml`: You can enable this workflow to get a JSON file containing the pull_request
+payload. This makes it easier to look at that data using an IDE's search and collapse features
+-  `get-push-payload.yml`: Same as above but for push events
 
 ## Testing
 
