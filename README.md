@@ -16,7 +16,9 @@ New list of PR labels after action run
 
 ### `skip-deploy`
 
-Skip deployment based on files being pushed? Returns "true" or "false" -- must compare as a string value in the "if" expression.
+Skip deployment based on files being pushed? Returns "true" or "false" -- must compare as a string
+value in the "if" expression. This should only be relied on for the default branch in a repo where
+commits are squashed in PRs!!
 
 ## Example job usage
 
@@ -63,16 +65,17 @@ TypeScript validation, linting and prettier. Local development may be possible u
 
 1. Create a local branch based off of the Jira tracker number
 (SODEV-#####), make code changes and push to GitHub
-1. The `release-dev.yml` workflow will run and build the action. NOTE: this will add a commit
-automatically with the compiled `dist` files. You'll need to pull before pushing again unless you
-force push.
-1. Once that workflow is complete, you need to use another branch to test changes. You can use the
-sample workflows in `.github/sample-workflows` to create a workflow for that branch. Also, there is
-a script `test/generateFiles.js` that can be used to create different types of changed files
-quickly. See the script comments for usage directions.
 1. At least one commit should use the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.2/)
 format so a release will be triggered when merging later. (The [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/#commit-message-format)
 utility requires that for versioning.)
+1. The `release-dev.yml` workflow will run and build the action. NOTE: this will add a commit
+automatically with the compiled `dist` files. You'll need to pull before pushing again unless you
+force push.
+1. Once that workflow is complete, you should create another repo for testing. You can use the
+sample workflows in `.github/sample-workflows` to create a workflow for that repo. Also, there is
+a script `test/generateFiles.js` that can be used to create different types of changed files
+quickly. See the script comments for usage directions. ([example testing repo](https://github.com/lisadean/the-sorting-hat-test))
+
 
 ## CI/CD
 
@@ -95,7 +98,7 @@ This repo needs tests! There's a test file but it's based on the old version tha
 ## Deployment
 
 1. When the PR is approved and merged, it will kick off the `release.yml` workflow which will bump
-the version, build the action and push it to the `v1` branch which production workflows point to.
+the version and push it to the `v1` branch which production workflows point to.
 1. The changes will take effect immediately since the production workflows point to the `v1` branch
 version. We could change this to use the actual tags/version numbers at some point for safety, but
 that would require changing the consuming workflows so this is simpler.

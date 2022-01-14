@@ -272,20 +272,17 @@ const handlePullRequest = async () => {
 };
 
 const handlePushEvent = async () => {
-	const commitBeingPushed = context.payload.after;
-	const defaultBranch = context.payload.repository.default_branch;
-	const getDefaultBranchCommits = await client.rest.repos.listCommits({
-		...context.repo
-	});
-	const defaultBranchHeadCommit = getDefaultBranchCommits.data[0].sha;
-	info(`Comparing commit ${defaultBranchHeadCommit} on ${defaultBranch} with ${commitBeingPushed} on ${context.ref}`);
+	// This is only meant to be used on the default branch when PR merges use squashed commits
+	const latestCommit = context.payload.after;
+	const previousCommit = context.payload.before;
+	info(`Comparing latest commit ${latestCommit} with previous commit ${previousCommit} on ${context.ref}`);
 	const compareCommits = await client.rest.repos.compareCommitsWithBasehead({
-		basehead: `${defaultBranchHeadCommit}...${commitBeingPushed}`,
+		basehead: `${previousCommit}...${latestCommit}`,
 		owner: context.repo.owner,
 		repo: context.repo.repo
 	});
 	const files = compareCommits.data.files;
-	info(`Files different from ${defaultBranch}: ${files.map((file) => file.filename).join(', ')}`);
+	info(`Files different between commits: ${files.map((file) => file.filename).join(', ')}`);
 	info(`Non-deployment glob patterns: ${NON_DEPLOYMENT_GLOB_PATTERNS.join(', ')}`);
 	const skipDeployment = files.every((file) => {
 		if (NON_DEPLOYMENT_GLOB_PATTERNS.some((glob) => minimatch(file.filename, glob))) {
@@ -295,8 +292,7 @@ const handlePushEvent = async () => {
 		return false;
 	});
 	info(`Skip deployment of all files: ${skipDeployment}`);
-	// core.setOutput('skip-deploy', skipDeployment);
-	core.setOutput('skip-deploy', 'false');
+	core.setOutput('skip-deploy', skipDeployment);
 };
 
 const run = async () => {
