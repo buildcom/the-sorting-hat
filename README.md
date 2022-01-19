@@ -64,6 +64,7 @@ skip-deploy:
 ### On pull_request_review workflow events
 
 -   Labels PRs with `needs one more` if they have one approving review but the PR is not fully approved
+-   Removes the `needs one more` label once the PR has been fully reviewed
 
 ## Development
 
