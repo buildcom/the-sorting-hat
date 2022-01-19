@@ -17,6 +17,7 @@ export const handlePullRequestReviewEvent = async ({ context, client }: input) =
 	}: PullRequestReviewEvent = context.payload as PullRequestReviewEvent;
 
 	const labelNeedsOneMore = async () => {
+		const LABEL_NAME = 'needs one more';
 		// This assumes the repo requires 2 reviews to merge
 		if (state === 'approved') {
 			info(`Approving review from ${reviewer} found (id: ${id})`);
@@ -31,21 +32,21 @@ export const handlePullRequestReviewEvent = async ({ context, client }: input) =
 			}`;
 			const response: any = await client.graphql(query);
 			const reviewDecision: PullRequestReviewDecision = response.repository.pullRequest.reviewDecision;
-			if (reviewDecision === 'APPROVED' && labels.find((label) => label.name === 'needs-one-more')) {
-				info(`PR is fully approved, removing needs-one-more label if present`);
+			if (reviewDecision === 'APPROVED' && labels.find((label) => label.name === LABEL_NAME)) {
+				info(`PR is fully approved, removing ${LABEL_NAME} label if present`);
 				await client.rest.issues.removeLabel({
 					...context.repo,
 					issue_number: number,
-					name: 'needs-one-more'
+					name: LABEL_NAME
 				});
 				return;
 			}
 			if (reviewDecision !== 'APPROVED') {
-				info(`PR is not fully approved, adding needs-one-more label if needed`);
+				info(`PR is not fully approved, adding ${LABEL_NAME} label if needed`);
 				await client.rest.issues.addLabels({
 					...context.repo,
 					issue_number: number,
-					labels: ['needs-one-more']
+					labels: [LABEL_NAME]
 				});
 			}
 		}
