@@ -1,4 +1,4 @@
-/******/ (() => { // webpackBootstrap
+require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
 /***/ 351:
@@ -27,7 +27,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.issue = exports.issueCommand = void 0;
-const os = __importStar(__nccwpck_require__(87));
+const os = __importStar(__nccwpck_require__(37));
 const utils_1 = __nccwpck_require__(278);
 /**
  * Commands
@@ -138,8 +138,8 @@ exports.getState = exports.saveState = exports.group = exports.endGroup = export
 const command_1 = __nccwpck_require__(351);
 const file_command_1 = __nccwpck_require__(717);
 const utils_1 = __nccwpck_require__(278);
-const os = __importStar(__nccwpck_require__(87));
-const path = __importStar(__nccwpck_require__(622));
+const os = __importStar(__nccwpck_require__(37));
+const path = __importStar(__nccwpck_require__(17));
 /**
  * The code to exit an action
  */
@@ -430,8 +430,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.issueCommand = void 0;
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const fs = __importStar(__nccwpck_require__(747));
-const os = __importStar(__nccwpck_require__(87));
+const fs = __importStar(__nccwpck_require__(147));
+const os = __importStar(__nccwpck_require__(37));
 const utils_1 = __nccwpck_require__(278);
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
@@ -477,15 +477,15 @@ exports.toCommandValue = toCommandValue;
 
 /***/ }),
 
-/***/ 53:
+/***/ 87:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Context = void 0;
-const fs_1 = __nccwpck_require__(747);
-const os_1 = __nccwpck_require__(87);
+const fs_1 = __nccwpck_require__(147);
+const os_1 = __nccwpck_require__(37);
 class Context {
     /**
      * Hydrate the context from the environment
@@ -564,7 +564,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokit = exports.context = void 0;
-const Context = __importStar(__nccwpck_require__(53));
+const Context = __importStar(__nccwpck_require__(87));
 const utils_1 = __nccwpck_require__(30);
 exports.context = new Context.Context();
 /**
@@ -657,7 +657,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokitOptions = exports.GitHub = exports.context = void 0;
-const Context = __importStar(__nccwpck_require__(53));
+const Context = __importStar(__nccwpck_require__(87));
 const Utils = __importStar(__nccwpck_require__(914));
 // octokit + plugins
 const core_1 = __nccwpck_require__(762);
@@ -698,8 +698,8 @@ exports.getOctokitOptions = getOctokitOptions;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const http = __nccwpck_require__(605);
-const https = __nccwpck_require__(211);
+const http = __nccwpck_require__(685);
+const https = __nccwpck_require__(687);
 const pm = __nccwpck_require__(443);
 let tunnel;
 var HttpCodes;
@@ -1952,18 +1952,22 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var request = __nccwpck_require__(234);
 var universalUserAgent = __nccwpck_require__(429);
 
-const VERSION = "4.6.4";
+const VERSION = "4.8.0";
 
-class GraphqlError extends Error {
-  constructor(request, response) {
-    const message = response.data.errors[0].message;
-    super(message);
-    Object.assign(this, response.data);
-    Object.assign(this, {
-      headers: response.headers
-    });
-    this.name = "GraphqlError";
-    this.request = request; // Maintains proper stack trace (only available on V8)
+function _buildMessageForResponseErrors(data) {
+  return `Request failed due to following response errors:\n` + data.errors.map(e => ` - ${e.message}`).join("\n");
+}
+
+class GraphqlResponseError extends Error {
+  constructor(request, headers, response) {
+    super(_buildMessageForResponseErrors(response));
+    this.request = request;
+    this.headers = headers;
+    this.response = response;
+    this.name = "GraphqlResponseError"; // Expose the errors and response data in their shorthand properties.
+
+    this.errors = response.errors;
+    this.data = response.data; // Maintains proper stack trace (only available on V8)
 
     /* istanbul ignore next */
 
@@ -2021,10 +2025,7 @@ function graphql(request, query, options) {
         headers[key] = response.headers[key];
       }
 
-      throw new GraphqlError(requestOptions, {
-        headers,
-        data: response.data
-      });
+      throw new GraphqlResponseError(requestOptions, headers, response.data);
     }
 
     return response.data.data;
@@ -2058,6 +2059,7 @@ function withCustomRequest(customRequest) {
   });
 }
 
+exports.GraphqlResponseError = GraphqlResponseError;
 exports.graphql = graphql$1;
 exports.withCustomRequest = withCustomRequest;
 //# sourceMappingURL=index.js.map
@@ -4388,7 +4390,7 @@ minimatch.Minimatch = Minimatch
 
 var path = { sep: '/' }
 try {
-  path = __nccwpck_require__(622)
+  path = __nccwpck_require__(17)
 } catch (er) {}
 
 var GLOBSTAR = minimatch.GLOBSTAR = Minimatch.GLOBSTAR = {}
@@ -5320,11 +5322,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var Stream = _interopDefault(__nccwpck_require__(413));
-var http = _interopDefault(__nccwpck_require__(605));
-var Url = _interopDefault(__nccwpck_require__(835));
-var https = _interopDefault(__nccwpck_require__(211));
-var zlib = _interopDefault(__nccwpck_require__(761));
+var Stream = _interopDefault(__nccwpck_require__(781));
+var http = _interopDefault(__nccwpck_require__(685));
+var Url = _interopDefault(__nccwpck_require__(310));
+var https = _interopDefault(__nccwpck_require__(687));
+var zlib = _interopDefault(__nccwpck_require__(796));
 
 // Based on https://github.com/tmpvar/jsdom/blob/aa85b2abf07766ff7bf5c1f6daafb3726f2f2db5/lib/jsdom/living/blob.js
 
@@ -5475,7 +5477,7 @@ FetchError.prototype.name = 'FetchError';
 
 let convert;
 try {
-	convert = __nccwpck_require__(877).convert;
+	convert = (__nccwpck_require__(877).convert);
 } catch (e) {}
 
 const INTERNALS = Symbol('Body internals');
@@ -6958,7 +6960,7 @@ fetch.Promise = global.Promise;
 
 module.exports = exports = fetch;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.default = exports;
+exports["default"] = exports;
 exports.Headers = Headers;
 exports.Request = Request;
 exports.Response = Response;
@@ -7030,13 +7032,13 @@ module.exports = __nccwpck_require__(219);
 "use strict";
 
 
-var net = __nccwpck_require__(631);
-var tls = __nccwpck_require__(16);
-var http = __nccwpck_require__(605);
-var https = __nccwpck_require__(211);
-var events = __nccwpck_require__(614);
-var assert = __nccwpck_require__(357);
-var util = __nccwpck_require__(669);
+var net = __nccwpck_require__(808);
+var tls = __nccwpck_require__(404);
+var http = __nccwpck_require__(685);
+var https = __nccwpck_require__(687);
+var events = __nccwpck_require__(361);
+var assert = __nccwpck_require__(491);
+var util = __nccwpck_require__(837);
 
 
 exports.httpOverHttp = httpOverHttp;
@@ -7370,7 +7372,7 @@ module.exports = eval("require")("encoding");
 
 /***/ }),
 
-/***/ 357:
+/***/ 491:
 /***/ ((module) => {
 
 "use strict";
@@ -7378,7 +7380,7 @@ module.exports = require("assert");
 
 /***/ }),
 
-/***/ 614:
+/***/ 361:
 /***/ ((module) => {
 
 "use strict";
@@ -7386,7 +7388,7 @@ module.exports = require("events");
 
 /***/ }),
 
-/***/ 747:
+/***/ 147:
 /***/ ((module) => {
 
 "use strict";
@@ -7394,7 +7396,7 @@ module.exports = require("fs");
 
 /***/ }),
 
-/***/ 605:
+/***/ 685:
 /***/ ((module) => {
 
 "use strict";
@@ -7402,7 +7404,7 @@ module.exports = require("http");
 
 /***/ }),
 
-/***/ 211:
+/***/ 687:
 /***/ ((module) => {
 
 "use strict";
@@ -7410,7 +7412,7 @@ module.exports = require("https");
 
 /***/ }),
 
-/***/ 631:
+/***/ 808:
 /***/ ((module) => {
 
 "use strict";
@@ -7418,7 +7420,7 @@ module.exports = require("net");
 
 /***/ }),
 
-/***/ 87:
+/***/ 37:
 /***/ ((module) => {
 
 "use strict";
@@ -7426,7 +7428,7 @@ module.exports = require("os");
 
 /***/ }),
 
-/***/ 622:
+/***/ 17:
 /***/ ((module) => {
 
 "use strict";
@@ -7434,7 +7436,7 @@ module.exports = require("path");
 
 /***/ }),
 
-/***/ 413:
+/***/ 781:
 /***/ ((module) => {
 
 "use strict";
@@ -7442,7 +7444,7 @@ module.exports = require("stream");
 
 /***/ }),
 
-/***/ 16:
+/***/ 404:
 /***/ ((module) => {
 
 "use strict";
@@ -7450,7 +7452,7 @@ module.exports = require("tls");
 
 /***/ }),
 
-/***/ 835:
+/***/ 310:
 /***/ ((module) => {
 
 "use strict";
@@ -7458,7 +7460,7 @@ module.exports = require("url");
 
 /***/ }),
 
-/***/ 669:
+/***/ 837:
 /***/ ((module) => {
 
 "use strict";
@@ -7466,7 +7468,7 @@ module.exports = require("util");
 
 /***/ }),
 
-/***/ 761:
+/***/ 796:
 /***/ ((module) => {
 
 "use strict";
@@ -7507,18 +7509,6 @@ module.exports = require("zlib");
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__nccwpck_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__nccwpck_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -7556,13 +7546,22 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
 "use strict";
+// ESM COMPAT FLAG
 __nccwpck_require__.r(__webpack_exports__);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(186);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(438);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var minimatch__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(973);
-/* harmony import */ var minimatch__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(minimatch__WEBPACK_IMPORTED_MODULE_2__);
+
+// EXPORTS
+__nccwpck_require__.d(__webpack_exports__, {
+  "getLabelNames": () => (/* binding */ getLabelNames),
+  "info": () => (/* binding */ info)
+});
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(186);
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
+var github = __nccwpck_require__(438);
+// EXTERNAL MODULE: ./node_modules/minimatch/minimatch.js
+var minimatch = __nccwpck_require__(973);
+;// CONCATENATED MODULE: ./src/pullRequestReviewEvent.ts
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7574,10 +7573,73 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 };
 
 
+const handlePullRequestReviewEvent = ({ context, client }) => __awaiter(void 0, void 0, void 0, function* () {
+    const { pull_request: { number, title, labels }, review: { state, id, user: { login: reviewer } } } = context.payload;
+    /*
+     * This function assumes the repo requires 2 reviews to merge, so it will add the label on
+     * the first approving review, and remove it on the second approving review.
+     */
+    const labelNeedsOneMore = () => __awaiter(void 0, void 0, void 0, function* () {
+        const LABEL_NAME = 'needs one more';
+        if (state === 'approved') {
+            info(`Approving review from ${reviewer} found (id: ${id})`);
+            const query = `{
+				repository(owner: "${context.repo.owner}", name: "${context.repo.repo}") {
+					pullRequest(number: ${number}) {
+						title
+						reviewDecision
+						url
+					}
+				}
+			}`;
+            const response = yield client.graphql(query);
+            const reviewDecision = response.repository.pullRequest.reviewDecision;
+            if (reviewDecision === 'APPROVED') {
+                info(`PR is fully approved, removing ${LABEL_NAME} label`);
+                yield client.rest.issues.removeLabel(Object.assign(Object.assign({}, context.repo), { issue_number: number, name: LABEL_NAME }));
+                return;
+            }
+            else {
+                info(`PR is not fully approved, adding ${LABEL_NAME} label`);
+                yield client.rest.issues.addLabels(Object.assign(Object.assign({}, context.repo), { issue_number: number, labels: [LABEL_NAME] }));
+            }
+        }
+    });
+    const outputCurrentLabels = () => __awaiter(void 0, void 0, void 0, function* () {
+        // This can be refactored to share with other event functions when tests are added
+        const { data } = yield client.rest.issues.listLabelsOnIssue(Object.assign(Object.assign({}, context.repo), { issue_number: number }));
+        const labels = getLabelNames(data).toString();
+        info(`Labels as a result of this action: ${labels.length ? labels : 'no labels'}`);
+        core.setOutput('labels', labels);
+    });
+    // wrapping in a try/catch because we don't want to fail the action for errors on these calls
+    try {
+        info(`Processing review for pull request #${number}: ${title}`);
+        yield labelNeedsOneMore();
+        yield outputCurrentLabels();
+    }
+    catch (err) {
+        info(`ERROR in handling pull request review event: ${err}`);
+    }
+});
+
+;// CONCATENATED MODULE: ./src/index.ts
+var src_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
 
 const DEBUG = false; // set this to true for extra logging
 let context;
-const client = _actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit(_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('token'));
+const client = github.getOctokit(core.getInput('token'));
 const CUSTOM_LABELS = [
     {
         name: 'size/XS',
@@ -7644,17 +7706,17 @@ const NON_DEPLOYMENT_GLOB_PATTERNS = [
     DOCS_MISC_GLOB_PATTERN,
     TESTS_GLOB_PATTERN
 ];
-const info = (stuff) => _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(stuff);
-const warning = (stuff) => _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning(stuff);
+const info = (stuff) => core.info(stuff);
+const warning = (stuff) => core.warning(stuff);
 const error = (stuff) => {
     if (typeof stuff !== 'string' && stuff.stack) {
-        _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(stuff.stack);
+        core.error(stuff.stack);
     }
     else {
-        _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(stuff);
+        core.error(stuff);
     }
 };
-const debug = (stuff) => DEBUG && _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`DEBUG: ${stuff}`);
+const debug = (stuff) => DEBUG && core.info(`DEBUG: ${stuff}`);
 const sortedSizeLabels = CUSTOM_LABELS.filter((label) => label.type === 'size').sort((a, b) => !a.maxLines ? 1 : !b.maxLines ? -1 : a.maxLines - b.maxLines);
 const getLabelNames = (labels) => labels.map((label) => label.name);
 const getSizeLabel = (lineCount) => {
@@ -7665,12 +7727,12 @@ const getSizeLabel = (lineCount) => {
     }
     return undefined;
 };
-const getExcludedGlobs = () => __awaiter(void 0, void 0, void 0, function* () {
+const getExcludedGlobs = () => src_awaiter(void 0, void 0, void 0, function* () {
     const path = '.gitattributes';
     const exclusions = ['linguist-generated=true', 'pr-size-ignore=true'];
     try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data } = yield client.rest.repos.getContent(Object.assign(Object.assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { path }));
+        const { data } = yield client.rest.repos.getContent(Object.assign(Object.assign({}, github.context.repo), { path }));
         const excludedFiles = data.content
             ? Buffer.from(data.content, 'base64')
                 .toString('ascii')
@@ -7685,20 +7747,20 @@ const getExcludedGlobs = () => __awaiter(void 0, void 0, void 0, function* () {
         return [];
     }
 });
-const ensureLabelExists = ({ name, color }) => __awaiter(void 0, void 0, void 0, function* () {
+const ensureLabelExists = ({ name, color }) => src_awaiter(void 0, void 0, void 0, function* () {
     try {
-        return yield client.rest.issues.getLabel(Object.assign(Object.assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { name }));
+        return yield client.rest.issues.getLabel(Object.assign(Object.assign({}, github.context.repo), { name }));
     }
     catch (e) {
-        return client.rest.issues.createLabel(Object.assign(Object.assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { name, color }));
+        return client.rest.issues.createLabel(Object.assign(Object.assign({}, github.context.repo), { name, color }));
     }
 });
-const getSizeBasedLabels = (changedLines, files, existingPRLabels) => __awaiter(void 0, void 0, void 0, function* () {
+const getSizeBasedLabels = (changedLines, files, existingPRLabels) => src_awaiter(void 0, void 0, void 0, function* () {
     let totalChangedLines = changedLines;
     let totalChangedLinesInExcludedFiles = 0;
     const excludedGlobs = yield getExcludedGlobs();
     for (const file of files) {
-        if (excludedGlobs.some((glob) => minimatch__WEBPACK_IMPORTED_MODULE_2__(file.filename, glob))) {
+        if (excludedGlobs.some((glob) => minimatch(file.filename, glob))) {
             info(`Excluding file: ${file.filename}`);
             totalChangedLines -= file.additions + file.deletions;
             totalChangedLinesInExcludedFiles += file.additions + file.deletions;
@@ -7730,7 +7792,7 @@ const getServerOnlyLabel = (files, existingPRLabels) => {
     for (const file of files) {
         debug(`processing file for server-only: ${file.filename}`);
     }
-    const serverOnly = files.length > 0 && !files.some((file) => !minimatch__WEBPACK_IMPORTED_MODULE_2__(file.filename, serverOnlyPattern));
+    const serverOnly = files.length > 0 && !files.some((file) => !minimatch(file.filename, serverOnlyPattern));
     if (serverOnly) {
         info('This PR is server only and has no UI changes');
     }
@@ -7743,7 +7805,7 @@ const getServerOnlyLabel = (files, existingPRLabels) => {
     debug(`labelToAdd-server: ${getLabelNames(labelToAdd)} labelsToRemove-server: ${getLabelNames(labelsToRemove)}`);
     return { labelToAdd, labelsToRemove };
 };
-const handlePullRequest = () => __awaiter(void 0, void 0, void 0, function* () {
+const handlePullRequest = () => src_awaiter(void 0, void 0, void 0, function* () {
     const { pull_request: { number, title, labels: prLabels, additions, deletions } } = context.payload;
     info(`Processing pull request #${number}: ${title} in ${context.repo.repo}`);
     debug(`existingLabels: ${getLabelNames(prLabels)}`);
@@ -7781,9 +7843,9 @@ const handlePullRequest = () => __awaiter(void 0, void 0, void 0, function* () {
     const { data: currentLabels } = yield client.rest.issues.listLabelsOnIssue(Object.assign(Object.assign({}, context.repo), { issue_number: number }));
     const actionOutputLabels = getLabelNames(currentLabels).toString();
     info(`Action output -- labels: ${actionOutputLabels}`);
-    _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('labels', actionOutputLabels);
+    core.setOutput('labels', actionOutputLabels);
 });
-const handlePushEvent = () => __awaiter(void 0, void 0, void 0, function* () {
+const handlePushEvent = () => src_awaiter(void 0, void 0, void 0, function* () {
     // This is only meant to be used on the default branch when PR merges use squashed commits
     const latestCommit = context.payload.after;
     const previousCommit = context.payload.before;
@@ -7797,23 +7859,28 @@ const handlePushEvent = () => __awaiter(void 0, void 0, void 0, function* () {
     info(`Files different between commits: ${files.map((file) => file.filename).join(', ')}`);
     info(`Non-deployment glob patterns: ${NON_DEPLOYMENT_GLOB_PATTERNS.join(', ')}`);
     const skipDeployment = files.every((file) => {
-        if (NON_DEPLOYMENT_GLOB_PATTERNS.some((glob) => minimatch__WEBPACK_IMPORTED_MODULE_2__(file.filename, glob))) {
+        if (NON_DEPLOYMENT_GLOB_PATTERNS.some((glob) => minimatch(file.filename, glob))) {
             return true;
         }
         info(`Deployable file ${file.filename} found`);
         return false;
     });
     info(`Skip deployment of all files: ${skipDeployment}`);
-    _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('skip-deploy', skipDeployment);
+    core.setOutput('skip-deploy', skipDeployment);
 });
-const run = () => __awaiter(void 0, void 0, void 0, function* () {
+const run = () => src_awaiter(void 0, void 0, void 0, function* () {
     try {
-        context = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context;
+        context = github.context;
         if (context.eventName === 'pull_request') {
             yield handlePullRequest();
         }
         else if (context.eventName === 'push') {
             yield handlePushEvent();
+        }
+        else if (context.eventName === 'pull_request_review') {
+            // When tests are added, the other two event functions should be refactored into their
+            // own files
+            yield handlePullRequestReviewEvent({ context, client });
         }
         else {
             info(`No relevant event found. Event: ${context.eventName}`);
@@ -7821,7 +7888,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     }
     catch (e) {
         error(e);
-        return _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed('Something went wrong');
+        return core.setFailed('Something went wrong');
     }
 });
 run();
@@ -7831,3 +7898,4 @@ run();
 module.exports = __webpack_exports__;
 /******/ })()
 ;
+//# sourceMappingURL=index.js.map
