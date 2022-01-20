@@ -1,8 +1,10 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
+import { GitHub } from '@actions/github/lib/utils';
 import * as minimatch from 'minimatch';
 import { Context } from '@actions/github/lib/context';
 import { PullRequestEvent, Label as GitHubLabel } from '@octokit/webhooks-types';
+import { handlePullRequestReviewEvent } from './pullRequestReviewEvent';
 
 const DEBUG = false; // set this to true for extra logging
 
@@ -30,7 +32,7 @@ type CustomLabel = {
 type LabelChanges = { labelToAdd: CustomLabel[]; labelsToRemove: GitHubLabel[] };
 
 let context: Context;
-const client = github.getOctokit(core.getInput('token'));
+const client: InstanceType<typeof GitHub> = github.getOctokit(core.getInput('token'));
 
 const CUSTOM_LABELS: CustomLabel[] = [
 	{
@@ -100,7 +102,7 @@ const NON_DEPLOYMENT_GLOB_PATTERNS = [
 	TESTS_GLOB_PATTERN
 ];
 
-const info = (stuff: string) => core.info(stuff);
+export const info = (stuff: string) => core.info(stuff);
 const warning = (stuff: string) => core.warning(stuff);
 const error = (stuff: string | Error) => {
 	if (typeof stuff !== 'string' && stuff.stack) {
@@ -115,7 +117,8 @@ const sortedSizeLabels = CUSTOM_LABELS.filter((label) => label.type === 'size').
 	!a.maxLines ? 1 : !b.maxLines ? -1 : a.maxLines - b.maxLines
 );
 
-const getLabelNames = (labels: CustomLabel[] | GitHubLabel[]): string[] => labels.map((label: CustomLabel | GitHubLabel) => label.name);
+export const getLabelNames = (labels: CustomLabel[] | GitHubLabel[]): string[] =>
+	labels.map((label: CustomLabel | GitHubLabel) => label.name);
 const getSizeLabel = (lineCount: number): CustomLabel | undefined => {
 	for (const label of sortedSizeLabels) {
 		if (!label.maxLines || lineCount <= label.maxLines) {
@@ -302,6 +305,10 @@ const run = async () => {
 			await handlePullRequest();
 		} else if (context.eventName === 'push') {
 			await handlePushEvent();
+		} else if (context.eventName === 'pull_request_review') {
+			// When tests are added, the other two event functions should be refactored into their
+			// own files
+			await handlePullRequestReviewEvent({ context, client });
 		} else {
 			info(`No relevant event found. Event: ${context.eventName}`);
 		}

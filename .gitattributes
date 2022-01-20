@@ -1,6 +1,7 @@
-# Mock data
-**/*.mocks.ts pr-size-ignore=true
-**/*.mock-data.ts pr-size-ignore=true
+package-lock.json pr-size-ignore=true
+**/*.test.** pr-size-ignore=true
+**/*.mocks.* pr-size-ignore=true
+**/*.mock-data.* pr-size-ignore=true
 
 # build files
-dist/* linguist-generated=true
+dist/** linguist-generated=true pr-size-ignore=true

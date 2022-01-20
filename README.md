@@ -49,12 +49,22 @@ skip-deploy:
 
 ## Features
 
+### On pull_request workflow events
+
 -   Labels PRs based on the number of line additions and deletions
     -   Original PR size labeling functionality taken from [Pull Request Size](https://github.com/noqcks/pull-request-size)
     -   Excludes files listed as `linguist-generated=true` or `pr-size-ignore=true` in `.gitattributes`
 -   Labels PRs as `server-only` if no changed files outside the `server` directory are found.
+
+### On push workflow events
+
 -   Checks files being pushed to see if they are all non-production and outputs a true/false `skip-deploy`
     value. This can be used to skip deployment on a push to the `main` branch.
+
+### On pull_request_review workflow events
+
+-   Labels PRs with `needs one more` if they have one approving review but the PR is not fully approved
+-   Removes the `needs one more` label once the PR has been fully reviewed
 
 ## Development
 
