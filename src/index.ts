@@ -228,7 +228,7 @@ const getServerOnlyLabel = (files: File[], existingPRLabels: GitHubLabel[]): Lab
 	const existingServerOnlyLabel = existingPRLabels.find((existingLabel) => existingLabel.name === serverOnlyLabel.name);
 	const labelToAdd: CustomLabel[] = serverOnly && !existingServerOnlyLabel ? [serverOnlyLabel] : [];
 	const labelsToRemove: GitHubLabel[] = !serverOnly && existingServerOnlyLabel ? [existingServerOnlyLabel] : [];
-	debug(`labelToAdd-server: ${getLabelNames(labelToAdd)} labelsToRemove-server: ${getLabelNames(labelsToRemove)}`);
+	debug(`labelToAdd-skipChromatic: ${getLabelNames(labelToAdd)} labelsToRemove-skipChromatic: ${getLabelNames(labelsToRemove)}`);
 	return { labelToAdd, labelsToRemove };
 };
 
