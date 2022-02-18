@@ -238,17 +238,11 @@ const getSkipChromaticLabel = (files: File[], existingPRLabels: GitHubLabel[]): 
 		return { labelToAdd: [], labelsToRemove: [] };
 	}
 
-	for (const file of files) {
-		debug(`processing file for skip-chromatic: ${file.filename}`);
-	}
-
 	const skipChromatic =
 		files.length > 0 &&
 		files.every((file) => {
-			if (CHROMATIC_SKIP_GLOB_PATTERNS.some((glob) => minimatch(file.filename, glob))) {
-				return true;
-			}
-			return false;
+			debug(`processing file for skip-chromatic: ${file.filename}`);
+			return CHROMATIC_SKIP_GLOB_PATTERNS.some((glob) => minimatch(file.filename, glob));
 		});
 
 	if (skipChromatic) {
