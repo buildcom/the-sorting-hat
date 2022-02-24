@@ -7680,6 +7680,11 @@ const CUSTOM_LABELS = [
         name: 'server-only',
         type: 'server-only',
         color: '66E5A2'
+    },
+    {
+        name: 'skip-chromatic',
+        type: 'skip-chromatic',
+        color: 'FC521F'
     }
 ];
 const MOCK_GLOB_PATTERN = '**/*.+(mocks|mock-data).ts';
@@ -7693,6 +7698,8 @@ const FERGY_TEMPLATES_GLOB_PATTERN = 'fergy-templates/**';
 const DOCS_GLOB_PATTERN = '**/*.md';
 const DOCS_MISC_GLOB_PATTERN = 'doc*/**';
 const TESTS_GLOB_PATTERN = '**/*.test.ts?(x)';
+const YAML_GLOB_PATTERN = '**/*.y?(a)ml';
+const SERVER_ONLY_GLOB_PATTERN = '**/src/server/**';
 const NON_DEPLOYMENT_GLOB_PATTERNS = [
     MOCK_GLOB_PATTERN,
     STORY_GLOB_PATTERN,
@@ -7705,6 +7712,18 @@ const NON_DEPLOYMENT_GLOB_PATTERNS = [
     DOCS_GLOB_PATTERN,
     DOCS_MISC_GLOB_PATTERN,
     TESTS_GLOB_PATTERN
+];
+const CHROMATIC_SKIP_GLOB_PATTERNS = [
+    GITHUB_GLOB_PATTERN,
+    HUSKY_GLOB_PATTERN,
+    OUTFILE_GLOB_PATTERN,
+    VSCODE_GLOB_PATTERN,
+    FERGY_TEMPLATES_GLOB_PATTERN,
+    DOCS_GLOB_PATTERN,
+    DOCS_MISC_GLOB_PATTERN,
+    TESTS_GLOB_PATTERN,
+    YAML_GLOB_PATTERN,
+    SERVER_ONLY_GLOB_PATTERN
 ];
 const info = (stuff) => core.info(stuff);
 const warning = (stuff) => core.warning(stuff);
@@ -7802,6 +7821,28 @@ const getServerOnlyLabel = (files, existingPRLabels) => {
     const existingServerOnlyLabel = existingPRLabels.find((existingLabel) => existingLabel.name === serverOnlyLabel.name);
     const labelToAdd = serverOnly && !existingServerOnlyLabel ? [serverOnlyLabel] : [];
     const labelsToRemove = !serverOnly && existingServerOnlyLabel ? [existingServerOnlyLabel] : [];
+    debug(`labelToAdd-skipChromatic: ${getLabelNames(labelToAdd)} labelsToRemove-skipChromatic: ${getLabelNames(labelsToRemove)}`);
+    return { labelToAdd, labelsToRemove };
+};
+const getSkipChromaticLabel = (files, existingPRLabels) => {
+    const skipChromaticLabel = CUSTOM_LABELS.find((label) => label.type === 'skip-chromatic');
+    if (!skipChromaticLabel) {
+        return { labelToAdd: [], labelsToRemove: [] };
+    }
+    const skipChromatic = files.length > 0 &&
+        files.every((file) => {
+            debug(`processing file for skip-chromatic: ${file.filename}`);
+            return CHROMATIC_SKIP_GLOB_PATTERNS.some((glob) => minimatch(file.filename, glob));
+        });
+    if (skipChromatic) {
+        info('This PR can skip chromatic');
+    }
+    else {
+        info('This PR needs to run chromatic');
+    }
+    const existingChromaticSkipLabel = existingPRLabels.find((existingLabel) => existingLabel.name === skipChromaticLabel.name);
+    const labelToAdd = skipChromatic && !existingChromaticSkipLabel ? [skipChromaticLabel] : [];
+    const labelsToRemove = !skipChromatic && existingChromaticSkipLabel ? [existingChromaticSkipLabel] : [];
     debug(`labelToAdd-server: ${getLabelNames(labelToAdd)} labelsToRemove-server: ${getLabelNames(labelsToRemove)}`);
     return { labelToAdd, labelsToRemove };
 };
@@ -7812,8 +7853,9 @@ const handlePullRequest = () => src_awaiter(void 0, void 0, void 0, function* ()
     const { data: prFiles } = yield client.rest.pulls.listFiles(Object.assign(Object.assign({}, context.repo), { pull_number: number }));
     const { labelToAdd: sizeLabelToAdd, labelsToRemove: sizeLabelsToRemove } = yield getSizeBasedLabels(additions + deletions, prFiles, prLabels);
     const { labelToAdd: serverOnlyLabelToAdd, labelsToRemove: serverOnlyLabelToRemove } = getServerOnlyLabel(prFiles, prLabels);
-    const labelsToAdd = sizeLabelToAdd.concat(serverOnlyLabelToAdd);
-    const labelsToRemove = sizeLabelsToRemove.concat(serverOnlyLabelToRemove);
+    const { labelToAdd: skipChromaticLabelToAdd, labelsToRemove: skipChromaticLabelToRemove } = getSkipChromaticLabel(prFiles, prLabels);
+    const labelsToAdd = sizeLabelToAdd.concat(serverOnlyLabelToAdd).concat(skipChromaticLabelToAdd);
+    const labelsToRemove = sizeLabelsToRemove.concat(serverOnlyLabelToRemove).concat(skipChromaticLabelToRemove);
     debug(`labels to add: ${getLabelNames(labelsToAdd)}`);
     debug(`labels to remove: ${getLabelNames(labelsToRemove)}`);
     if (labelsToRemove.length > 0) {
@@ -7858,6 +7900,7 @@ const handlePushEvent = () => src_awaiter(void 0, void 0, void 0, function* () {
     const files = compareCommits.data.files;
     info(`Files different between commits: ${files.map((file) => file.filename).join(', ')}`);
     info(`Non-deployment glob patterns: ${NON_DEPLOYMENT_GLOB_PATTERNS.join(', ')}`);
+    info(`Skip Chromatic glob patters: ${CHROMATIC_SKIP_GLOB_PATTERNS.join(', ')}`);
     const skipDeployment = files.every((file) => {
         if (NON_DEPLOYMENT_GLOB_PATTERNS.some((glob) => minimatch(file.filename, glob))) {
             return true;
@@ -7865,8 +7908,19 @@ const handlePushEvent = () => src_awaiter(void 0, void 0, void 0, function* () {
         info(`Deployable file ${file.filename} found`);
         return false;
     });
+    // Check every file, all files need to return true to pass
+    const skipChromaticRun = files.every((file) => {
+        // Check if current file matches any of the patterns in CHROMATIC_SKIP_GLOB_PATTERNS
+        if (CHROMATIC_SKIP_GLOB_PATTERNS.some((glob) => minimatch(file.filename, glob))) {
+            return true;
+        }
+        info(`Chromatic test file ${file.filename} found`);
+        return false;
+    });
     info(`Skip deployment of all files: ${skipDeployment}`);
+    info(`Skip chromatic run of all files: ${skipChromaticRun}`);
     core.setOutput('skip-deploy', skipDeployment);
+    core.setOutput('skip-chromatic', skipChromaticRun);
 });
 const run = () => src_awaiter(void 0, void 0, void 0, function* () {
     try {
