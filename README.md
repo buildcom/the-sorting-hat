@@ -1,3 +1,6 @@
+⚠️ **This GitHub Action is decommissioned and archived** ⚠️
+---
+
 # The Sorting Hat
 
 GitHub action to label stuff.
